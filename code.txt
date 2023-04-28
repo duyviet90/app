@@ -1,0 +1,290 @@
+function onEdit(e) {
+const giaohang = SpreadsheetApp.getActiveSpreadsheet();
+var ss = giaohang.getSheetByName("Trả linh kiện về kho");
+var token =ss.getRange('B2').getValue();
+  var url = 'https://openapi.zalo.me/v2.0/oa/message';
+  //header zalo
+  var header = {
+    'access_token': token,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  };
+
+//Lấy vùng edit của sheet data
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName("Data");
+  var addnewdata = sheet.getActiveCell();
+  var addnew = sheet.getRange('A2:AB');
+
+//Lấy vùng edit của sheet giao hàng
+  
+  var sheetgiaohang = ss.getSheetByName("Diachigiaohang");
+  var addnewdata1 = sheetgiaohang.getActiveCell();
+  var addnewgiaohang = sheetgiaohang.getRange('A2:J'); 
+
+// lấy vùng edit của sheet ứng linh kiện
+  var sheetlk = giaohang.getSheetByName("NV ứng LK");
+  var addnewdatalk = sheetlk.getActiveCell();
+  var addnewlk = sheetlk.getRange('B2:E');
+  var tensheet = ss.getActiveSheet().getName();
+
+// Gửi thông báo ứng linh kiện
+if (tensheet==="NV ứng LK"&& addnewdatalk.getColumn() ===3) {
+  var headerRows = 1; // Number of header rows to skip
+    var MaxRowunglk = addnewdatalk.getLastRow();
+    Logger.log(MaxRowunglk);
+    var nhanvienung = sheetlk.getRange(MaxRowunglk, 3).getValue(); //lấy tên nhân viên
+    var tenlkung = sheetlk.getRange(MaxRowunglk, 4).getValue(); //Lấy tên linh kiện
+    var imeiung = sheetlk.getRange(MaxRowunglk, 5).getValue(); //Lấy số điện thoại khách
+    var tinnhanunglk = nhanvienung +" Vừa ứng linh kiện" + '\n' +
+                   "  - Tên linh kiện: " + tenlkung + '\n' +
+                   "  - Imei linh kiện : " + imeiung + '\n' +
+                   "Cần vào App duyệt ứng linh kiện";
+    Logger.log(tinnhanunglk);
+     var zalovyunglk = JSON.stringify({
+      'recipient': {
+        'user_id': '5933946981490832152'
+      },
+      'message': {
+        'text': tinnhanunglk
+      }
+    });
+ 
+    var res_vy_unglk =
+    {
+      'method': 'POST',
+      'payload': zalovyunglk,
+      'headers': header,
+      'redirect': 'follow'
+    }; 
+    var tinnhanunglinhkien = UrlFetchApp.fetch(url, res_vy_unglk);
+    Logger.log(tinnhanunglinhkien);
+}
+
+//Gửi thông báo địa chỉ giao hàng
+  
+  if (tensheet ==="Diachigiaohang"&& addnewdata1.getColumn() === 10) {
+    var headerRows1 = 1; // Number of header rows to skip
+    var MaxRowgiaohang = addnewdata1.getLastRow();
+    Logger.log(MaxRowgiaohang);
+    var nhanvienban = sheetgiaohang.getRange(MaxRowgiaohang, 10).getValues(); //lấy tên nhân viên
+    var giaohang_tenkhach = sheetgiaohang.getRange(MaxRowgiaohang, 3).getValues(); //lấy tên khách hàng
+    var giaohang_diachi = sheetgiaohang.getRange(MaxRowgiaohang, 6).getValues(); //Lấy địa chỉ 
+    var giaohang_sanpham = sheetgiaohang.getRange(MaxRowgiaohang, 8).getValues(); //Lấy sản phẩm mua 
+    var giaohang_sotien = sheetgiaohang.getRange(MaxRowgiaohang, 9).getValues(); //lấy số tiền còn lại
+    let tinnhangiaohang = nhanvienban+" Vừa bán sản phẩm" + '\n' +
+                   "  - Tên khách: " + giaohang_tenkhach + '\n' +
+                   "  - Địa chỉ: " + giaohang_diachi + '\n' +
+                   "  - Sản phầm mua: " + giaohang_sanpham+'\n'+
+                   "  - Số tiền còn lại:" +giaohang_sotien;
+    Logger.log(tinnhangiaohang);   
+   
+    var banhang_zalo_thuong = JSON.stringify({
+      'recipient': {
+        'user_id': '7755534426401501920' //banhang_zalo_ thương
+      },
+      'message': {
+        'text': tinnhangiaohang
+      }
+    });
+    var banhang_zalo_hung = JSON.stringify({
+      'recipient': {
+        'user_id': '3439027265475063544' //banhang_zalo_ hưng
+      },
+      'message': {
+        'text': tinnhangiaohang
+      }
+    });
+    var banhang_zalo_vy = JSON.stringify({
+      'recipient': {
+        'user_id': '5933946981490832152'
+      },
+      'message': {
+        'text': tinnhangiaohang
+      }
+    });
+    var banhang_zalo_dinhanh = JSON.stringify({
+      'recipient': {
+        'user_id': '5524383858054881003'
+      },
+      'message': {
+        'text': tinnhangiaohang
+      }
+    });
+    //Logger.log(raw)
+    var banhang_res_hung =
+    {
+      'method': 'POST',
+      'payload': banhang_zalo_hung,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var banhang_res_vy =
+    {
+      'method': 'POST',
+      'payload': banhang_zalo_vy,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var banhang_res_2anh =
+    {
+      'method': 'POST',
+      'payload': banhang_zalo_dinhanh,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var banhang_res_thuong =
+    {
+      'method': 'POST',
+      'payload': banhang_zalo_thuong,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var banhangguichohung = UrlFetchApp.fetch(url, banhang_res_hung);
+    var banhangguichokuheo = UrlFetchApp.fetch(url, banhang_res_2anh);
+    var banhangtinnhanchivy1 = UrlFetchApp.fetch(url, banhang_res_vy);
+    var banhangguichothuong = UrlFetchApp.fetch(url, banhang_res_thuong);
+  }
+  
+  //Gửi thông báo công việc mới cho Full kỹ thuật
+  if (tensheet==="Data"&& addnewdata.getColumn() === 30) {
+    var headerRows = 1; // Number of header rows to skip
+    var MaxRow = sheet.getLastRow();
+    Logger.log(MaxRow);
+    var nhanvienduatask = sheet.getRange(MaxRow, 30).getValues(); //lấy tên nhân viên
+    var tn1 = sheet.getRange(MaxRow, 3).getValues(); //lấy tên khách hàng
+    var tn2 = sheet.getRange(MaxRow, 4).getValues(); //Lấy địa chỉ công việc
+    var tn3 = sheet.getRange(MaxRow, 5).getValues(); //Lấy số điện thoại khách
+    var tn4 = sheet.getRange(MaxRow, 6).getValues(); //Lấy yêu cầu công việc
+    var tinnhan = nhanvienduatask+" Vừa Thêm Việc Mới" + '\n' +
+                   "  - Tên khách: " + tn1 + '\n' +
+                   "  - Địa chỉ: " + tn2 + '\n' +
+                   "  - Yêu Cầu: " + tn4;
+    Logger.log(tinnhan);
+   
+    var zalothuong = JSON.stringify({
+      'recipient': {
+        'user_id': '7755534426401501920' //zalo thương
+      },
+      'message': {
+        'text': tinnhan
+      }
+    });
+
+    var zaloan = JSON.stringify({
+      'recipient': {
+        'user_id': '7333476240189954180' //zalo an
+      },
+      'message': {
+        'text': tinnhan
+      }
+    });
+
+    var zalohung = JSON.stringify({
+      'recipient': {
+        'user_id': '3439027265475063544' //zalo hưng
+      },
+      'message': {
+        'text': tinnhan
+      }
+    });
+    var zalovy = JSON.stringify({
+      'recipient': {
+        'user_id': '5933946981490832152'
+      },
+      'message': {
+        'text': tinnhan
+      }
+    });
+    var zalodinhanh = JSON.stringify({
+      'recipient': {
+        'user_id': '5524383858054881003'
+      },
+      'message': {
+        'text': tinnhan
+      }
+    });
+    //Logger.log(raw)
+    var res_hung =
+    {
+      'method': 'POST',
+      'payload': zalohung,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var res_vy =
+    {
+      'method': 'POST',
+      'payload': zalovy,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var res_2anh =
+    {
+      'method': 'POST',
+      'payload': zalodinhanh,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var res_thuong =
+    {
+      'method': 'POST',
+      'payload': zalothuong,
+      'headers': header,
+      'redirect': 'follow'
+    };
+
+    // var op = Utilities.base64Encode(requestOptions.body);
+    var guichohung = UrlFetchApp.fetch(url, res_hung);
+    var guichokuheo = UrlFetchApp.fetch(url, res_2anh);
+    var tinnhanchivy1 = UrlFetchApp.fetch(url, res_vy);
+    var guichothuong = UrlFetchApp.fetch(url, res_thuong);
+  }
+  //Gửi thông báo hoàn thành công việc cho Quản lý
+  if (tensheet==="Data"&& addnewdata.getColumn() === 12) {
+    let dongchinhsua = addnewdata.getRow();
+    dongchinhsua = +dongchinhsua
+    var tenkhachhang = sheet.getRange(dongchinhsua, 3).getValues();
+    var diachikhachhang = sheet.getRange(dongchinhsua, 4).getValues();
+    var sodienthoaikhach = sheet.getRange(dongchinhsua, 5).getValues();
+    var yeucausuachua = sheet.getRange(dongchinhsua, 6).getValues();
+    var tennhanvien = sheet.getRange(dongchinhsua, 12).getValues();
+    var noidunghoanthanh = sheet.getRange(dongchinhsua, 13).getValues();
+    var dichvu = sheet.getRange(dongchinhsua, 8).getValues();
+    var linhkienthay = sheet.getRange(dongchinhsua, 9).getValues();
+    var linhkienthaymoi = sheet.getRange(dongchinhsua, 10).getValues();
+    var giatien = sheet.getRange(dongchinhsua, 19).getValues();
+    var gps = sheet.getRange(dongchinhsua, 32).getValues();
+    
+    var tinnhanhoanthanh = tennhanvien + " đã hoàn thành công việc " +'\n'+
+                          " -Tên Khách: "+ tenkhachhang +'\n'+
+                          " -Địa chỉ: " + diachikhachhang +'\n'+
+                          " -Số điện thoại: " + sodienthoaikhach + '\n'+
+                          " -Yêu cầu: " + yeucausuachua + '\n' + 
+                          " -Ghi chú: "+ noidunghoanthanh + '\n'+
+                          " -Dịch Vụ: " + dichvu +'\n'+
+                          " -Linh kiện thay: " + linhkienthay +'\n'+
+                          " -Linh kiện thay mới: "+linhkienthaymoi+'\n'+
+                          " -Số tiền: " + giatien+'\n'+
+                          " -GPS: "+"https://www.google.com/maps/dir/"+gps;
+
+    // Logger.log(row);
+    Logger.log(tinnhanhoanthanh);
+    var messages1 = tinnhanhoanthanh;
+    var tnhoanthanh_vy = JSON.stringify({
+      'recipient': {
+        'user_id': '5933946981490832152'
+      },
+      'message': {
+        'text': tinnhanhoanthanh
+      }
+    });
+    var reshoanthanhvy =
+    {
+      'method': 'POST',
+      'payload': tnhoanthanh_vy,
+      'headers': header,
+      'redirect': 'follow'
+    };
+    var zalohoanthanh = UrlFetchApp.fetch(url, reshoanthanhvy);
+  }}
